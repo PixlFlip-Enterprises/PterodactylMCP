@@ -10,6 +10,7 @@ from urllib.parse import quote
 
 from fastmcp import FastMCP
 
+from .ai_tools import register_ai_tools
 from .client import PterodactylClient, PterodactylConfig
 from .routes import APPLICATION_ROUTES
 
@@ -102,7 +103,13 @@ def _register_application_route_tools() -> None:
                 "return": Any,
             }
 
-            mcp.tool(name=name, description=f"{method} {template_path}")(_tool)
+            description = f"{method} {template_path}"
+            if method == "GET" and template_path == "/api/application/users":
+                description += " (raw; can be large — prefer ptero_ai_list_users / ptero_ai_search_users)"
+            elif method == "GET" and template_path == "/api/application/servers":
+                description += " (raw; can be large — prefer ptero_ai_list_servers / ptero_ai_search_servers)"
+
+            mcp.tool(name=name, description=description)(_tool)
 
         _make_tool()
 
@@ -128,6 +135,7 @@ def ptero_app_request(
 
 
 _register_application_route_tools()
+register_ai_tools(mcp, _client)
 
 
 def main(argv: list[str] | None = None) -> None:

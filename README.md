@@ -6,6 +6,7 @@ Model Context Protocol (MCP) server for the **Pterodactyl Panel Application API*
 
 - MCP tools that map to Pterodactyl **Application API** routes (users, servers, nodes, locations, nests/eggs, server databases).
 - A generic `ptero_app_request` tool for calling any `/api/application/...` endpoint not yet mapped.
+- AI-friendly, token-efficient tools (search, compact lists, summaries).
 
 ## Supported endpoints (Application API)
 
@@ -17,6 +18,16 @@ This server exposes one MCP tool per route from the NETVPX Application API docs,
 - **Locations**: list/get/create/update/delete
 - **Nests/Eggs**: list nests, get nest, list eggs, get egg
 - **Server databases**: list/get/create/delete, reset database password
+
+## AI-friendly tools (recommended)
+
+These tools are designed to keep responses small and “LLM-friendly”:
+
+- `ptero_ai_search_users` (top-N fuzzy search across username/email/name/external_id/uuid)
+- `ptero_ai_search_servers` (top-N fuzzy search across name/identifier/uuid/external_id)
+- `ptero_ai_list_users` / `ptero_ai_list_servers` (compact, safe defaults)
+- `ptero_ai_get_user_summary` / `ptero_ai_get_server_summary` (compact single-resource views)
+- `ptero_ai_panel_totals` (counts for common resources)
 
 ## References
 
@@ -120,10 +131,21 @@ Route tools are generated using the pattern:
 - Each route tool takes the route path params as normal arguments (e.g. `server`, `user`, `node`), plus optional `query` and `body`.
 - Use `query` for query-string parameters (pagination, filters, includes), and `body` for JSON request payloads.
 - To discover all tool names and their routes, call `ptero_app_list_endpoints`.
+- For token efficiency, prefer the `ptero_ai_*` tools for discovery (search/list/summary), then call the raw `ptero_app_*` route tool once you have the exact ID.
 
 Example query params (brackets are valid dict keys):
 
 - `{"filter[email]": "admin@example.com", "include": "servers"}`
+
+Example workflow:
+
+1) Find the user you mean (compact results):
+
+- Call `ptero_ai_search_users` with `query="pixel flip"`
+
+2) Then fetch the full object only for the selected match:
+
+- Call `ptero_app_get_users_user` with `user=<id>`
 
 To list all exposed tools and their routes, call:
 
