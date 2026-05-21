@@ -1,0 +1,64 @@
+{
+  "dxt_version": "0.1",
+  "name": "pterodactyl-mcp",
+  "display_name": "Pterodactyl MCP",
+  "version": "0.1.0",
+  "description": "MCP server for the Pterodactyl Panel Application API (admin endpoints).",
+  "long_description": "Manage Pterodactyl users, servers, nodes, locations, nests, eggs, and server databases from any MCP-aware AI client. Includes 50 tools, 2 workflow prompts, and 2 resources covering the full Application API.",
+  "author": {
+    "name": "PixlFlip Enterprises",
+    "url": "https://github.com/PixlFlip-Enterprises/PterodactylMCP"
+  },
+  "homepage": "https://github.com/PixlFlip-Enterprises/PterodactylMCP",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PixlFlip-Enterprises/PterodactylMCP"
+  },
+  "license": "MIT",
+  "keywords": ["pterodactyl", "mcp", "panel", "game-server"],
+  "server": {
+    "type": "python",
+    "entry_point": "pterodactyl_mcp/__main__.py",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "pterodactyl_mcp", "--transport", "stdio", "--no-banner"],
+      "env": {
+        "PANEL_URL": "${user_config.panel_url}",
+        "PANEL_TOKEN": "${user_config.panel_token}",
+        "PANEL_TIMEOUT": "${user_config.panel_timeout}",
+        "PANEL_VERIFY_SSL": "${user_config.panel_verify_ssl}"
+      }
+    }
+  },
+  "user_config": {
+    "panel_url": {
+      "type": "string",
+      "title": "Panel URL",
+      "description": "Base URL of your Pterodactyl panel (no trailing slash).",
+      "required": true
+    },
+    "panel_token": {
+      "type": "string",
+      "title": "Application API Key",
+      "description": "Pterodactyl Application API key (usually starts with 'ptla_').",
+      "sensitive": true,
+      "required": true
+    },
+    "panel_timeout": {
+      "type": "number",
+      "title": "Request timeout (seconds)",
+      "default": 30,
+      "required": false
+    },
+    "panel_verify_ssl": {
+      "type": "boolean",
+      "title": "Verify SSL",
+      "default": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "python": ">=3.10"
+  }
+}

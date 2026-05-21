@@ -1,6 +1,49 @@
 # PterodactylMCP
 
+[![MCP Badge](https://lobehub.com/badge/mcp/pixlflip-enterprises-pterodactylmcp)](https://lobehub.com/mcp/pixlflip-enterprises-pterodactylmcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+
 Model Context Protocol (MCP) server for the **Pterodactyl Panel Application API** (admin endpoints), built with FastMCP.
+
+## Quick install
+
+Pick whichever path matches your client.
+
+**uvx (recommended, no checkout needed):**
+
+```bash
+uvx pterodactyl-mcp
+```
+
+**pip:**
+
+```bash
+pip install pterodactyl-mcp
+pterodactyl-mcp
+```
+
+**Docker:**
+
+```bash
+docker build -t pterodactyl-mcp .
+docker run --rm -i \
+  -e PANEL_URL=https://panel.example.com \
+  -e PANEL_TOKEN=ptla_REPLACE_ME \
+  pterodactyl-mcp
+```
+
+**Claude Desktop one-click (DXT):** see [Building a DXT bundle](#building-a-dxt-bundle) below.
+
+**Smithery:** a ready-to-use `smithery.yaml` ships at the repo root.
+
+## Capabilities
+
+| Kind | Count | Highlights |
+| --- | --- | --- |
+| Tools | 50 | All Application API routes (users, servers, nodes, locations, nests/eggs, databases) plus AI-friendly helpers and a generic raw-request escape hatch. |
+| Prompts | 2 | `troubleshoot_server`, `provision_user_and_server` |
+| Resources | 2 | `pterodactyl://panel/overview`, `pterodactyl://servers/{server_id}/summary` |
 
 ## What this provides
 
@@ -101,9 +144,26 @@ Most MCP desktop clients launch the server as a subprocess. Point them at:
 
 If your client does not run with this repo as the working directory, prefer setting `PANEL_URL` and `PANEL_TOKEN` in the client config environment instead of relying on `.env` discovery.
 
-### Claude Desktop example (Windows)
+### Claude Desktop example (uvx — works on Windows/macOS/Linux)
 
-Edit `%APPDATA%\\Claude\\claude_desktop_config.json` and add a server entry (adjust paths as needed):
+Edit your `claude_desktop_config.json` and add:
+
+```json
+{
+  "mcpServers": {
+    "pterodactyl": {
+      "command": "uvx",
+      "args": ["pterodactyl-mcp"],
+      "env": {
+        "PANEL_URL": "https://panel.example.com",
+        "PANEL_TOKEN": "ptla_REPLACE_ME"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop (from a local checkout, Windows)
 
 ```json
 {
@@ -119,6 +179,29 @@ Edit `%APPDATA%\\Claude\\claude_desktop_config.json` and add a server entry (adj
   }
 }
 ```
+
+## Building a DXT bundle
+
+This repo ships a `manifest.json` so you can build a one-click `.dxt` for Claude Desktop:
+
+```bash
+npm install -g @anthropic-ai/dxt
+dxt pack
+```
+
+The resulting `.dxt` file can be dropped into Claude Desktop — it prompts the user for `PANEL_URL` and `PANEL_TOKEN` on install.
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+ruff check .
+pytest
+```
+
+## License
+
+[MIT](LICENSE)
 
 ## Tool naming
 
