@@ -12,6 +12,8 @@ from fastmcp import FastMCP
 
 from .ai_tools import register_ai_tools
 from .client import PterodactylClient, PterodactylConfig
+from .prompts import register_prompts
+from .resources import register_resources
 from .routes import APPLICATION_ROUTES
 
 PathParam = str | int
@@ -136,6 +138,8 @@ def ptero_app_request(
 
 _register_application_route_tools()
 register_ai_tools(mcp, _client)
+register_prompts(mcp)
+register_resources(mcp, _client)
 
 
 def main(argv: list[str] | None = None) -> None:

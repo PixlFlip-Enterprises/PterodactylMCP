@@ -24,7 +24,7 @@ class PterodactylConfig:
     user_agent: str = "PterodactylMCP/0.1"
 
     @classmethod
-    def from_env(cls) -> "PterodactylConfig":
+    def from_env(cls) -> PterodactylConfig:
         repo_root = Path(__file__).resolve().parents[1]
         load_dotenv(repo_root / ".env", override=False)
 

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterable
 from difflib import SequenceMatcher
-from typing import Any, Callable, Iterable
+from typing import Any
 
 from fastmcp import FastMCP
 
@@ -66,20 +67,33 @@ def register_ai_tools(mcp: FastMCP, client_factory: Callable[[], PterodactylClie
 
     @mcp.tool(description="Get a compact server summary (token-efficient).")
     def ptero_ai_get_server_summary(server: str | int) -> dict[str, Any]:
-        payload = client_factory().request("GET", f"/api/application/servers/{server}")
-        attributes = _extract_attributes(payload)
-        return _compact_server(attributes)
+        return get_server_summary(client_factory(), server)
 
     @mcp.tool(description="Return counts (totals) for common Application API resources (token-efficient).")
     def ptero_ai_panel_totals() -> dict[str, int]:
-        client = client_factory()
-        return {
-            "users": _get_total(client, "/api/application/users"),
-            "servers": _get_total(client, "/api/application/servers"),
-            "nodes": _get_total(client, "/api/application/nodes"),
-            "locations": _get_total(client, "/api/application/locations"),
-            "nests": _get_total(client, "/api/application/nests"),
-        }
+        return get_panel_totals(client_factory())
+
+
+def get_panel_totals(client: PterodactylClient) -> dict[str, int]:
+    return {
+        "users": _get_total(client, "/api/application/users"),
+        "servers": _get_total(client, "/api/application/servers"),
+        "nodes": _get_total(client, "/api/application/nodes"),
+        "locations": _get_total(client, "/api/application/locations"),
+        "nests": _get_total(client, "/api/application/nests"),
+    }
+
+
+def get_server_summary(client: PterodactylClient, server: str | int) -> dict[str, Any]:
+    payload = client.request("GET", f"/api/application/servers/{server}")
+    attributes = _extract_attributes(payload)
+    return _compact_server(attributes)
+
+
+def get_user_summary(client: PterodactylClient, user: str | int) -> dict[str, Any]:
+    payload = client.request("GET", f"/api/application/users/{user}")
+    attributes = _extract_attributes(payload)
+    return _compact_user(attributes)
 
 
 _NON_ALNUM_RE = re.compile(r"[^a-z0-9]+")
