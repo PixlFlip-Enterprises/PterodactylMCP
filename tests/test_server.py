@@ -34,6 +34,7 @@ def test_server_registers_client_tools():
     assert "ptero_client_power" in names
     assert "ptero_client_send_command" in names
     assert "ptero_client_server_status" in names
+    assert "ptero_client_console_tail" in names
 
     # client meta tools
     assert "ptero_client_list_endpoints" in names

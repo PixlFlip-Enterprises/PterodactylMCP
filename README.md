@@ -108,6 +108,8 @@ Client API:
 
 - `ptero_client_power(server, signal)` — start/stop/restart/kill
 - `ptero_client_send_command(server, command)` — send a console command (no output returned)
+- `ptero_client_console_tail(server, seconds=8, lines=80)` — read recent console output over the
+  console websocket (the panel's console source); pairs with `send_command` to confirm execution
 - `ptero_client_server_status(server)` — compact `current_state` + cpu/memory/disk/uptime
 - `ptero_client_list_servers()` — compact list of servers this client key can access
 

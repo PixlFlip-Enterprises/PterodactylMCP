@@ -48,8 +48,8 @@ set as `PANEL_TOKEN`, it is reused for the client tools automatically (back-comp
   - Application groups (`ptero_app_*`): Users, Servers, Nodes, Locations, Nests/Eggs, Server Databases.
   - Client groups (`ptero_client_*`): power, console command, resources/status, files, backups, schedules, startup, network, subusers.
   - AI helpers — Application (`ptero_ai_*`): fuzzy search, compact list, summary, panel totals.
-  - AI helpers — Client (`ptero_client_power`, `ptero_client_send_command`, `ptero_client_server_status`, `ptero_client_list_servers`).
-  - Note: `ptero_client_send_command` returns `204` with no console output; the `{server}` arg is the short identifier (e.g. `95415e3b`).
+  - AI helpers — Client (`ptero_client_power`, `ptero_client_send_command`, `ptero_client_console_tail`, `ptero_client_server_status`, `ptero_client_list_servers`).
+  - Note: `ptero_client_send_command` returns `204` with no console output; read output back with `ptero_client_console_tail` (opens the console websocket). The `{server}` arg is the short identifier (e.g. `95415e3b`).
 - **Prompts (2)**
   - `troubleshoot_server` — guided diagnostic walkthrough for a server.
   - `provision_user_and_server` — guided create-user-then-server workflow.

@@ -60,6 +60,7 @@ class PterodactylClient:
         bearer = token or config.panel_token
         if not bearer:
             raise ValueError("PterodactylClient requires an API token")
+        self._base_url = config.panel_url.rstrip("/")
         self._http = httpx.Client(
             base_url=config.panel_url,
             timeout=config.timeout,
@@ -71,6 +72,11 @@ class PterodactylClient:
                 "User-Agent": config.user_agent,
             },
         )
+
+    @property
+    def base_url(self) -> str:
+        """Panel base URL (no trailing slash), e.g. https://panel.example.com."""
+        return self._base_url
 
     def request(
         self,
