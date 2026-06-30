@@ -18,7 +18,8 @@ def _parse_bool(value: str | None, *, default: bool) -> bool:
 @dataclass(frozen=True)
 class PterodactylConfig:
     panel_url: str
-    panel_token: str
+    panel_token: str | None = None
+    panel_client_token: str | None = None
     timeout: float = 30.0
     verify_ssl: bool = True
     user_agent: str = "PterodactylMCP/0.1"
@@ -29,11 +30,15 @@ class PterodactylConfig:
         load_dotenv(repo_root / ".env", override=False)
 
         panel_url = os.environ.get("PANEL_URL", "").strip()
-        panel_token = os.environ.get("PANEL_TOKEN", "").strip()
+        panel_token = os.environ.get("PANEL_TOKEN", "").strip() or None
+        panel_client_token = os.environ.get("PANEL_CLIENT_TOKEN", "").strip() or None
         if not panel_url:
             raise ValueError("Missing required env var: PANEL_URL")
-        if not panel_token:
-            raise ValueError("Missing required env var: PANEL_TOKEN")
+        if not panel_token and not panel_client_token:
+            raise ValueError(
+                "Missing required env var: set PANEL_TOKEN (Application API, ptla_) "
+                "and/or PANEL_CLIENT_TOKEN (Client API, ptlc_)"
+            )
 
         timeout_raw = os.environ.get("PANEL_TIMEOUT", "").strip()
         timeout = float(timeout_raw) if timeout_raw else 30.0
@@ -43,6 +48,7 @@ class PterodactylConfig:
         return cls(
             panel_url=panel_url.rstrip("/"),
             panel_token=panel_token,
+            panel_client_token=panel_client_token,
             timeout=timeout,
             verify_ssl=verify_ssl,
             user_agent=user_agent,
@@ -50,13 +56,16 @@ class PterodactylConfig:
 
 
 class PterodactylClient:
-    def __init__(self, config: PterodactylConfig) -> None:
+    def __init__(self, config: PterodactylConfig, *, token: str | None = None) -> None:
+        bearer = token or config.panel_token
+        if not bearer:
+            raise ValueError("PterodactylClient requires an API token")
         self._http = httpx.Client(
             base_url=config.panel_url,
             timeout=config.timeout,
             verify=config.verify_ssl,
             headers={
-                "Authorization": f"Bearer {config.panel_token}",
+                "Authorization": f"Bearer {bearer}",
                 "Accept": "Application/vnd.pterodactyl.v1+json",
                 "Content-Type": "application/json",
                 "User-Agent": config.user_agent,
