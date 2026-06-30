@@ -1,6 +1,6 @@
 # PterodactylMCP
 
-MCP server for the **Pterodactyl Panel Application API**. Provides admin-level control over users, servers, nodes, locations, nests, eggs, and server databases via the Model Context Protocol.
+MCP server for the **Pterodactyl Panel Application API and Client API**. Provides admin-level control over users, servers, nodes, locations, nests, eggs, and databases (Application API), plus live control of running servers — power signals, console commands, status, files, and backups (Client API) — via the Model Context Protocol.
 
 ## Install
 
@@ -15,10 +15,14 @@ pip install pterodactyl-mcp && pterodactyl-mcp
 | Env var | Required | Description |
 | --- | --- | --- |
 | `PANEL_URL` | yes | Base URL of your Pterodactyl panel (e.g. `https://panel.example.com`). |
-| `PANEL_TOKEN` | yes | Application API key (usually starts with `ptla_`). |
+| `PANEL_TOKEN` | one of* | Application API key (usually starts with `ptla_`). Backs `ptero_app_*` / `ptero_ai_*`. |
+| `PANEL_CLIENT_TOKEN` | one of* | Client API key (usually starts with `ptlc_`). Backs `ptero_client_*`. |
 | `PANEL_TIMEOUT` | no | HTTP timeout in seconds (default `30`). |
 | `PANEL_VERIFY_SSL` | no | `true`/`false` (default `true`). |
 | `PANEL_USER_AGENT` | no | Custom User-Agent. |
+
+\* At least one of `PANEL_TOKEN` / `PANEL_CLIENT_TOKEN` is required. If only a `ptlc_` key is
+set as `PANEL_TOKEN`, it is reused for the client tools automatically (back-compat shim).
 
 ## MCP client configuration
 
@@ -30,7 +34,8 @@ pip install pterodactyl-mcp && pterodactyl-mcp
       "args": ["pterodactyl-mcp"],
       "env": {
         "PANEL_URL": "https://panel.example.com",
-        "PANEL_TOKEN": "ptla_REPLACE_ME"
+        "PANEL_TOKEN": "ptla_REPLACE_ME",
+        "PANEL_CLIENT_TOKEN": "ptlc_REPLACE_ME"
       }
     }
   }
@@ -39,9 +44,12 @@ pip install pterodactyl-mcp && pterodactyl-mcp
 
 ## Capabilities
 
-- **Tools (50)** — one per Application API route plus AI-friendly helpers and a generic raw-request escape hatch.
-  - Groups: Users, Servers, Nodes, Locations, Nests/Eggs, Server Databases.
-  - AI helpers (`ptero_ai_*`): fuzzy search, compact list, summary, panel totals.
+- **Tools (113)** — one per Application **and** Client API route plus AI-friendly helpers and per-API raw-request escape hatches.
+  - Application groups (`ptero_app_*`): Users, Servers, Nodes, Locations, Nests/Eggs, Server Databases.
+  - Client groups (`ptero_client_*`): power, console command, resources/status, files, backups, schedules, startup, network, subusers.
+  - AI helpers — Application (`ptero_ai_*`): fuzzy search, compact list, summary, panel totals.
+  - AI helpers — Client (`ptero_client_power`, `ptero_client_send_command`, `ptero_client_server_status`, `ptero_client_list_servers`).
+  - Note: `ptero_client_send_command` returns `204` with no console output; the `{server}` arg is the short identifier (e.g. `95415e3b`).
 - **Prompts (2)**
   - `troubleshoot_server` — guided diagnostic walkthrough for a server.
   - `provision_user_and_server` — guided create-user-then-server workflow.

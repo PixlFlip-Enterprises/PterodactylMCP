@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-Model Context Protocol (MCP) server for the **Pterodactyl Panel Application API** (admin endpoints), built with FastMCP.
+Model Context Protocol (MCP) server for the **Pterodactyl Panel Application API** (admin endpoints) **and Client API** (live server control — power, console, status, files, backups), built with FastMCP.
 
 ## Quick install
 
@@ -41,9 +41,23 @@ docker run --rm -i \
 
 | Kind | Count | Highlights |
 | --- | --- | --- |
-| Tools | 50 | All Application API routes (users, servers, nodes, locations, nests/eggs, databases) plus AI-friendly helpers and a generic raw-request escape hatch. |
+| Tools | 113 | All Application API routes (users, servers, nodes, locations, nests/eggs, databases) **and Client API routes** (power, console command, resources/status, files, backups, schedules, startup) plus AI-friendly helpers and per-API raw-request escape hatches. |
 | Prompts | 2 | `troubleshoot_server`, `provision_user_and_server` |
 | Resources | 2 | `pterodactyl://panel/overview`, `pterodactyl://servers/{server_id}/summary` |
+
+## Two APIs, two keys
+
+Pterodactyl exposes two separate APIs and a single key belongs to exactly one of them:
+
+| API | Path prefix | Key prefix | Tools | Token env var |
+| --- | --- | --- | --- | --- |
+| Application | `/api/application/...` | `ptla_` | `ptero_app_*`, `ptero_ai_*` | `PANEL_TOKEN` |
+| Client | `/api/client/...` | `ptlc_` | `ptero_client_*` | `PANEL_CLIENT_TOKEN` |
+
+You may set either key, or both. **At least one is required.** Back-compat shim: if
+`PANEL_CLIENT_TOKEN` is unset but `PANEL_TOKEN` is a `ptlc_` key, it is reused for the
+client tools automatically — so an existing client-key config lights up `ptero_client_*`
+with no changes.
 
 ## What this provides
 
@@ -62,15 +76,40 @@ This server exposes one MCP tool per route from the NETVPX Application API docs,
 - **Nests/Eggs**: list nests, get nest, list eggs, get egg
 - **Server databases**: list/get/create/delete, reset database password
 
+## Supported endpoints (Client API)
+
+One MCP tool per route from the panel's `routes/api-client.php`, including:
+
+- **Power / console**: `power` (start/stop/restart/kill), `command` (send console command)
+- **Status**: `resources` (current state + cpu/mem/disk), server details, `websocket` token, `activity`
+- **Files**: list, contents, download, write, rename, copy, compress, decompress, delete, create-folder, chmod, pull
+- **Backups**: list/create/view/download/lock/restore/delete
+- **Startup / settings**: startup vars, rename, reinstall, docker-image
+- **Schedules, network allocations, subusers, databases**
+
+> **Note:** the `command` endpoint returns `204` with **no console output** — Pterodactyl does
+> not return output from it. Live console output requires the websocket (out of scope for now).
+> The Client API `{server}` parameter is the **short identifier** (e.g. `95415e3b`), not the
+> numeric Application id.
+
 ## AI-friendly tools (recommended)
 
 These tools are designed to keep responses small and “LLM-friendly”:
+
+Application API:
 
 - `ptero_ai_search_users` (top-N fuzzy search across username/email/name/external_id/uuid)
 - `ptero_ai_search_servers` (top-N fuzzy search across name/identifier/uuid/external_id)
 - `ptero_ai_list_users` / `ptero_ai_list_servers` (compact, safe defaults)
 - `ptero_ai_get_user_summary` / `ptero_ai_get_server_summary` (compact single-resource views)
 - `ptero_ai_panel_totals` (counts for common resources)
+
+Client API:
+
+- `ptero_client_power(server, signal)` — start/stop/restart/kill
+- `ptero_client_send_command(server, command)` — send a console command (no output returned)
+- `ptero_client_server_status(server)` — compact `current_state` + cpu/memory/disk/uptime
+- `ptero_client_list_servers()` — compact list of servers this client key can access
 
 ## References
 
@@ -111,7 +150,9 @@ If your panel UI differs, follow the Authentication reference link below.
 - Copy `.env.example` to `.env`
 - Set:
   - `PANEL_URL` (e.g. `https://panel.example.com`)
-  - `PANEL_TOKEN` (your **Application** API key, usually starts with `ptla_`)
+  - `PANEL_TOKEN` (your **Application** API key, usually starts with `ptla_`) — for `ptero_app_*`
+  - `PANEL_CLIENT_TOKEN` (your **Client** API key, usually starts with `ptlc_`) — for `ptero_client_*`
+  - At least one of the two tokens is required; set both to use both API trees.
 
 Optional env vars:
 
@@ -207,7 +248,11 @@ pytest
 
 Route tools are generated using the pattern:
 
-`ptero_app_{method}_{path}` (with `/api/application/` removed, `/` → `_`, `-` → `_`, `{param}` → `param`).
+- Application API: `ptero_app_{method}_{path}` (with `/api/application/` removed)
+- Client API: `ptero_client_{method}_{path}` (with `/api/client/` removed)
+
+In both cases `/` → `_`, `-` → `_`, and `{param}` → `param`. Discover the full list with
+`ptero_app_list_endpoints` / `ptero_client_list_endpoints`.
 
 ## Calling tools
 
