@@ -19,6 +19,28 @@ def test_server_registers_expected_tools():
     assert "ptero_app_request" in names
 
 
+def test_server_registers_client_tools():
+    tools = asyncio.run(mcp.list_tools())
+    names = {t.name for t in tools}
+
+    # priority-tier client routes
+    assert "ptero_client_get" in names
+    assert "ptero_client_get_servers_server" in names
+    assert "ptero_client_get_servers_server_resources" in names
+    assert "ptero_client_post_servers_server_power" in names
+    assert "ptero_client_post_servers_server_command" in names
+
+    # ergonomic client AI tools
+    assert "ptero_client_power" in names
+    assert "ptero_client_send_command" in names
+    assert "ptero_client_server_status" in names
+    assert "ptero_client_console_tail" in names
+
+    # client meta tools
+    assert "ptero_client_list_endpoints" in names
+    assert "ptero_client_request" in names
+
+
 def test_server_registers_prompts():
     prompts = asyncio.run(mcp.list_prompts())
     names = {p.name for p in prompts}

@@ -3,8 +3,8 @@
   "name": "pterodactyl-mcp",
   "display_name": "Pterodactyl MCP",
   "version": "0.1.0",
-  "description": "MCP server for the Pterodactyl Panel Application API (admin endpoints).",
-  "long_description": "Manage Pterodactyl users, servers, nodes, locations, nests, eggs, and server databases from any MCP-aware AI client. Includes 50 tools, 2 workflow prompts, and 2 resources covering the full Application API.",
+  "description": "MCP server for the Pterodactyl Panel Application and Client APIs (admin + live server control).",
+  "long_description": "Manage Pterodactyl users, servers, nodes, locations, nests, eggs, and server databases (Application API), and control running servers with power signals, console commands, status, files, and backups (Client API). Includes 113 tools, 2 workflow prompts, and 2 resources covering both API trees.",
   "author": {
     "name": "PixlFlip Enterprises",
     "url": "https://github.com/PixlFlip-Enterprises/PterodactylMCP"
@@ -25,6 +25,7 @@
       "env": {
         "PANEL_URL": "${user_config.panel_url}",
         "PANEL_TOKEN": "${user_config.panel_token}",
+        "PANEL_CLIENT_TOKEN": "${user_config.panel_client_token}",
         "PANEL_TIMEOUT": "${user_config.panel_timeout}",
         "PANEL_VERIFY_SSL": "${user_config.panel_verify_ssl}"
       }
@@ -40,9 +41,16 @@
     "panel_token": {
       "type": "string",
       "title": "Application API Key",
-      "description": "Pterodactyl Application API key (usually starts with 'ptla_').",
+      "description": "Pterodactyl Application API key (usually starts with 'ptla_'). Backs the admin ptero_app_* / ptero_ai_* tools. Optional if a Client API key is provided.",
       "sensitive": true,
-      "required": true
+      "required": false
+    },
+    "panel_client_token": {
+      "type": "string",
+      "title": "Client API Key",
+      "description": "Pterodactyl Client API key (usually starts with 'ptlc_'). Backs the ptero_client_* tools (power, console command, status, files, backups). Optional if an Application API key is provided. At least one key is required.",
+      "sensitive": true,
+      "required": false
     },
     "panel_timeout": {
       "type": "number",
